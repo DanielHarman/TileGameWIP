@@ -38,6 +38,7 @@ class tile_entity(pygame.sprite.Sprite):
 		self.height 	= height
 		self.xpos		= 0
 		self.ypos		= 0
+
 		self.blinkOn 	= False
 
 		self.image = pygame.Surface([self.width, self.height])
@@ -46,7 +47,8 @@ class tile_entity(pygame.sprite.Sprite):
 
 		self.rect = self.image.get_rect()
 
-	def update(self, widthOffset, heightOffset, screen):
+	def update(self, widthOffset, heightOffset, screen, screenDimensions):
+
 
 		self.xpos = widthOffset
 		self.ypos = heightOffset
@@ -56,7 +58,14 @@ class tile_entity(pygame.sprite.Sprite):
 		else:
 			self.colour = ttype.get_type_colour(self.tileType)
 
-		pygame.draw.rect(screen, self.colour, [widthOffset, heightOffset, self.width-1, self.height-1])
+
+		if ((0 - self.width <= self.xpos <= screenDimensions["width"] + self.width) and (0 - self.height <= self.ypos <= screenDimensions["height"] + self.height )):
+
+			pygame.draw.rect(screen, self.colour, [widthOffset, heightOffset, self.width-1, self.height-1])
+			self.debugRender = 1
+			
+		else:
+			self.debugRender = 0
 
 	def change_type(self, tileType):
 
@@ -74,6 +83,7 @@ class tile_field(object):
 		self.tileHeight 	= tileHeight
 		self.selectedTile 	= None
 		self.blinkDel 		= 0
+		self.renderCount 	= 0
 
 		counterID = 0
 
@@ -102,12 +112,13 @@ class tile_field(object):
 				return entity
 				break
 
-	def draw(self):
+	def draw(self, screenOffsetX, screenOffsetY, screenDimensions):
 
-		widthOffset 	= 0
-		heightOffset 	= 0
+		widthOffset 	= 0 -screenOffsetX
+		heightOffset 	= 0 -screenOffsetY
 		flip 			= False
 		counter 		= 0
+		self.renderCount = 0
 
 		if (not self.selectedTile is None):
 			if(self.blinkDel >= 60):
@@ -121,7 +132,10 @@ class tile_field(object):
 			if (not (entity is self.selectedTile)):
 				entity.blinkOn = False
 
-			entity.update(widthOffset, heightOffset, self.screen)
+			
+			entity.update(widthOffset, heightOffset, self.screen, screenDimensions)
+
+			self.renderCount += entity.debugRender
 
 			#Counters and offset updates
 			widthOffset += self.tileWidth
@@ -132,6 +146,6 @@ class tile_field(object):
 				flip = not flip
 
 				heightOffset  += self.tileHeight
-				widthOffset = 0
+				widthOffset = 0 -screenOffsetX
 				counter = 0
 		
