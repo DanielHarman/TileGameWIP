@@ -39,6 +39,7 @@ scrollBoundary  = 75
 
 done = False
 
+#Main game loop
 while not done:
 
 	for event in pygame.event.get():
@@ -70,10 +71,6 @@ while not done:
 
 	if ((0 <= pygame.mouse.get_pos()[1] <= scrollArea) and not (screenOffsetY < -scrollBoundary)):
 		screenOffsetY -= scrollSpeed
-
-	print (((tileWidth-1)*fieldWidth + scrollBoundary) )
-	print ("//")
-	print (screenOffsetX + dimensions["width"])
 
 	if ((dimensions["width"] - scrollArea <= pygame.mouse.get_pos()[0] <= dimensions["width"]) and not ((screenOffsetX + dimensions["width"]) > ((tileWidth)*fieldWidth) + scrollBoundary)):
 		screenOffsetX += scrollSpeed

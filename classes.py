@@ -27,7 +27,9 @@ class ttype(Enum):
 			return WHITE
 
 class tile_entity(pygame.sprite.Sprite):
-	
+
+
+
 	def __init__(self, ID, width, height, tileType=ttype.ground, colour=GREEN):
 		pygame.sprite.Sprite.__init__(self)
 
@@ -49,7 +51,6 @@ class tile_entity(pygame.sprite.Sprite):
 
 	def update(self, widthOffset, heightOffset, screen, screenDimensions):
 
-
 		self.xpos = widthOffset
 		self.ypos = heightOffset
 
@@ -63,7 +64,7 @@ class tile_entity(pygame.sprite.Sprite):
 
 			pygame.draw.rect(screen, self.colour, [widthOffset, heightOffset, self.width-1, self.height-1])
 			self.debugRender = 1
-			
+
 		else:
 			self.debugRender = 0
 
@@ -121,7 +122,7 @@ class tile_field(object):
 		self.renderCount = 0
 
 		if (not self.selectedTile is None):
-			if(self.blinkDel >= 60):
+			if(self.blinkDel >= 40):
 				self.selectedTile.blinkOn = not self.selectedTile.blinkOn
 				self.blinkDel = 0
 
