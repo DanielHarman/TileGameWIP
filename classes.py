@@ -152,10 +152,10 @@ class tile_field(object):
 
 class soldier(pygame.sprite.Sprite):
 
-	def __init__(self,xPos,yPos):
+	def __init__(self,xPos,yPos,spriteFile="soldier.png"):
 		pygame.sprite.Sprite.__init__(self)
 
-		self.image = pygame.image.load("soldier.png").convert()
+		self.image = pygame.image.load(spriteFile).convert()
 
 		#All offsets and positions are in pixels
 		self.image.set_colorkey(WHITE)
@@ -178,9 +178,8 @@ class soldier(pygame.sprite.Sprite):
 
 		self.spriteSize = self.rect.size
 
-		print (self.xPos)
 
-	def update(self,screenOffsetX,screenOffsetY):
+	def update(self,screenOffsetX,screenOffsetY): 
 		self.widthOffset = screenOffsetX
 		self.heightOffset = screenOffsetY
 
@@ -223,4 +222,9 @@ class soldier(pygame.sprite.Sprite):
 		self.destXPos = destX + screenOffsetX
 		self.destYPos = destY + screenOffsetY
 
+
+class engineer(soldier):
+
+	def __init__(self, xPos, yPos):
+		super().__init__(xPos,yPos,"engineer.png")
 

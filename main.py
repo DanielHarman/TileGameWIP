@@ -48,7 +48,9 @@ playField = classes.tile_field(screen, fieldWidth,  fieldheight, tileWidth, tile
 
 for x in range(10):
 	testSol = classes.soldier(x*10,10)
+	testEngi = classes.engineer(x*10, 50)
 	actors.add(testSol)
+	actors.add(testEngi)
 
 #Main game loop
 while not done:
@@ -62,7 +64,7 @@ while not done:
 
 			if (event.button == 1):
 
-				if (actorSelected is True):
+				if (actorSelected is True and rMouseHeld is False):
 					for actor in actors:
 						if (actor.selected is True):
 							actor.add_destination(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1],screenOffsetX, screenOffsetY) #Add destination can work for building for waypoints
@@ -74,6 +76,11 @@ while not done:
 
 				for actor in actors:
 					if ((actor.xPos - screenOffsetX <= pygame.mouse.get_pos()[0] <= (actor.xPos - screenOffsetX + actor.spriteSize[0] )) and (actor.yPos - screenOffsetY <= pygame.mouse.get_pos()[1] <= (actor.yPos -screenOffsetY + actor.spriteSize[1]))):
+						actor.selected = True
+						actorSelected = True
+						print ("Selected: " + str(actor))
+
+					elif ((sBoxStartPos[0] <= actor.xPos - screenOffsetX <= sBoxEndPos[0])):
 						actor.selected = True
 						actorSelected = True
 						print ("Selected: " + str(actor))
