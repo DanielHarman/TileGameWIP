@@ -29,7 +29,6 @@ class ttype(Enum):
 class tile_entity(pygame.sprite.Sprite):
 
 
-
 	def __init__(self, ID, width, height, tileType=ttype.ground, colour=GREEN):
 		pygame.sprite.Sprite.__init__(self)
 
@@ -76,7 +75,7 @@ class tile_field(object):
 
 	def __init__(self, screen, fieldWidth, fieldHeight, tileWidth=10, tileHeight=10):
 
-		self.entityTable 	= []
+		self.entityTable 	= pygame.sprite.Group()
 		self.screen			= screen
 		self.fieldWidth 	= fieldWidth
 		self.fieldHeight 	= fieldHeight
@@ -90,7 +89,7 @@ class tile_field(object):
 
 		for heightPoint in range(self.fieldHeight):
 			for widthPoint in range(self.fieldWidth):
-				self.entityTable.append(tile_entity(counterID, self.tileWidth, self.tileHeight))
+				self.entityTable.add(tile_entity(counterID, self.tileWidth, self.tileHeight))
 				counterID += 1
 
 
@@ -150,3 +149,54 @@ class tile_field(object):
 				widthOffset = 0 -screenOffsetX
 				counter = 0
 		
+
+class soldier(pygame.sprite.Sprite):
+
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+
+		self.image = pygame.image.load("soldier.png").convert()
+
+		#All offsets and positions are in pixels
+		self.xPos 			= 30
+		self.yPos 			= 30
+
+		self.widthOffset 	= 0
+		self.heightOffset 	= 0
+
+		self.moveSpd		= 5 
+
+		self.destXPos		= self.xPos
+		self.destYPos 		= self.yPos
+
+		self.image.set_colorkey(WHITE)
+		self.rect = self.image.get_rect()
+
+		self.spriteSize = self.rect.size
+
+	def update(self,screenOffsetX,screenOffsetY):
+		self.widthOffset = screenOffsetX
+		self.heightOffset = screenOffsetY
+
+		#Movement - Nowhere near pathfinding
+		if (not (self.xPos == self.destXPos) or not (self.yPos == self.destYPos)):
+
+			if (self.xPos < self.destXPos):
+				self.xPos += self.moveSpd
+
+			if (self.xPos > self.destXPos):
+				self.xPos +- self.moveSpd
+
+			if (self.yPos < self.destYPos):
+				self.yPos += self.moveSpd
+
+			if (self.yPos > self.destYPos):
+				self.yPos +- self.moveSpd
+
+		self.rect.x = self.xPos - screenOffsetX
+		self.rect.y = self.yPos - screenOffsetY
+
+	def add_Destination(self, destX, destY):
+
+		self.destX = destY - self.widthOffset
+		self.destY = destY - self.heightOffset
