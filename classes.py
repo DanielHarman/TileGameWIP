@@ -152,51 +152,75 @@ class tile_field(object):
 
 class soldier(pygame.sprite.Sprite):
 
-	def __init__(self):
+	def __init__(self,xPos,yPos):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.image = pygame.image.load("soldier.png").convert()
 
 		#All offsets and positions are in pixels
-		self.xPos 			= 30
-		self.yPos 			= 30
+		self.image.set_colorkey(WHITE)
+		self.rect = self.image.get_rect()
+
+		self.xPos 			= xPos
+		self.yPos 			= yPos
+		self.rect.x 		= xPos
+		self.rect.y 		= yPos
 
 		self.widthOffset 	= 0
 		self.heightOffset 	= 0
 
 		self.moveSpd		= 5 
 
+		self.selected 		= False
+
 		self.destXPos		= self.xPos
 		self.destYPos 		= self.yPos
 
-		self.image.set_colorkey(WHITE)
-		self.rect = self.image.get_rect()
-
 		self.spriteSize = self.rect.size
+
+		print (self.xPos)
 
 	def update(self,screenOffsetX,screenOffsetY):
 		self.widthOffset = screenOffsetX
 		self.heightOffset = screenOffsetY
 
+		#All vars must local otherwise we get sprites wandering with viewport movement
+		xPos = self.xPos #- screenOffsetX
+		yPos = self.yPos #- screenOffsetY
+
+		destXPos = self.destXPos #- screenOffsetX
+		destYPos = self.destYPos #- screenOffsetY
+
 		#Movement - Nowhere near pathfinding
-		if (not (self.xPos == self.destXPos) or not (self.yPos == self.destYPos)):
+		if (not (xPos == destXPos) or not (yPos == destYPos)):
 
-			if (self.xPos < self.destXPos):
-				self.xPos += self.moveSpd
+			if (xPos < destXPos):
+				xPos += self.moveSpd
 
-			if (self.xPos > self.destXPos):
-				self.xPos +- self.moveSpd
+			if (xPos > destXPos):
+				xPos -= self.moveSpd
 
-			if (self.yPos < self.destYPos):
-				self.yPos += self.moveSpd
+			if (yPos < destYPos):
+				yPos += self.moveSpd
 
-			if (self.yPos > self.destYPos):
-				self.yPos +- self.moveSpd
+			if (yPos > destYPos):
+				#print("Soldier is at {0} and target is {1}".format(self.yPos, self.destYPos))
+				yPos -= self.moveSpd
 
+		self.xPos = xPos 
+		self.yPos = yPos
 		self.rect.x = self.xPos - screenOffsetX
 		self.rect.y = self.yPos - screenOffsetY
 
-	def add_Destination(self, destX, destY):
+		if (self.selected):
+			print ("Soldier is at {0} and {1}".format(self.xPos, self.yPos))
+			print ("Move to :" + str(destXPos - self.widthOffset)+ " " + str(destYPos - self.heightOffset))
 
-		self.destX = destY - self.widthOffset
-		self.destY = destY - self.heightOffset
+	def add_destination(self, destX, destY, screenOffsetX, screenOffsetY):
+		self.widthOffset = screenOffsetX
+		self.heightOffset = screenOffsetY
+
+		self.destXPos = destX + screenOffsetX
+		self.destYPos = destY + screenOffsetY
+
+

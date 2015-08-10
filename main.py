@@ -24,6 +24,7 @@ scrollBoundary  = 75
 
 done 			= False
 rMouseHeld		= False
+actorSelected 	= False
 
 sBoxStartPos 	= (0,0)
 sBoxEndPos		= (0,0)
@@ -45,11 +46,9 @@ actors = pygame.sprite.Group() #Act like
 
 playField = classes.tile_field(screen, fieldWidth,  fieldheight, tileWidth, tileHeight)
 
-
-testSol = classes.soldier()
-testSol.rect.x = 20
-testSol.rect.y = 20
-actors.add(testSol)
+for x in range(10):
+	testSol = classes.soldier(x*10,10)
+	actors.add(testSol)
 
 #Main game loop
 while not done:
@@ -63,22 +62,30 @@ while not done:
 
 			if (event.button == 1):
 
+				if (actorSelected is True):
+					for actor in actors:
+						if (actor.selected is True):
+							actor.add_destination(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1],screenOffsetX, screenOffsetY) #Add destination can work for building for waypoints
+
 				if (rMouseHeld is False):
 					sBoxStartPos = pygame.mouse.get_pos()
 				
-					
-
 				rMouseHeld = True
 
 				for actor in actors:
-					if (actor.xPos - screenOffsetX <= pygame.mouse.get_pos()[0] <= (actor.xPos - screenOffsetX + actor.spriteSize[0] )):
+					if ((actor.xPos - screenOffsetX <= pygame.mouse.get_pos()[0] <= (actor.xPos - screenOffsetX + actor.spriteSize[0] )) and (actor.yPos - screenOffsetY <= pygame.mouse.get_pos()[1] <= (actor.yPos -screenOffsetY + actor.spriteSize[1]))):
+						actor.selected = True
+						actorSelected = True
 						print ("Selected: " + str(actor))
+
+			elif (event.button == 3):
+				for actor in actors:
+					actor.selected = False
+				actorSelected = False
 
 			#returnID = playField.id_at_pos(pygame.mouse.get_pos())
 			#clickedEntity = playField.get_entity_from_id(returnID)
 			#playField.selectedTile = clickedEntity 
-
-
 
 			if (playField.selectedTile is None):
 				pygame.display.set_caption("IDK right now {0}, Selected Tile: {1}, Tile no: {2}, Rend:{3}".format(pygame.mouse.get_pos(), "None", len(playField.entityTable), playField.renderCount))
