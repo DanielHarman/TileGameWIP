@@ -35,7 +35,7 @@ pygame.init() #Start pygame
 
 size = (dimensions["width"],dimensions["height"])
 screen = pygame.display.set_mode(size) #Create the screen
-fonts = pygame.font.SysFont("helvetica", 30)
+unitFont = pygame.font.SysFont("ariel", 15)
 
 clock = pygame.time.Clock()
 pygame.key.set_repeat(2,2)
@@ -47,13 +47,15 @@ actors = pygame.sprite.Group() #Act like
 playField = classes.tile_field(screen, fieldWidth,  fieldheight, tileWidth, tileHeight)
 
 for x in range(10):
-	testSol = classes.soldier(x*10,10)
-	testEngi = classes.engineer(x*10, 50)
+	testSol = classes.soldier(x*30,10,unitFont)
+	testEngi = classes.engineer(x*10, 50,unitFont)
 	actors.add(testSol)
 	actors.add(testEngi)
 
 #Main game loop
 while not done:
+
+	mousePosByOffset = (pygame.mouse.get_pos()[0] + screenOffsetX, pygame.mouse.get_pos()[1] + screenOffsetY)
 
 	for event in pygame.event.get():
 
@@ -62,56 +64,53 @@ while not done:
 
 		if event.type == pygame.MOUSEBUTTONDOWN:
 
-			if (event.button == 1):
+			rMouseHeld = False
 
-				if (actorSelected is True and rMouseHeld is False):
-					for actor in actors:
-						if (actor.selected is True):
-							actor.add_destination(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1],screenOffsetX, screenOffsetY) #Add destination can work for building for waypoints
-
-				if (rMouseHeld is False):
-					sBoxStartPos = pygame.mouse.get_pos()
-				
+			if (event.button == 1): #Left click down
 				rMouseHeld = True
+				sBoxStartPos = mousePosByOffset
 
-				for actor in actors:
-					if ((actor.xPos - screenOffsetX <= pygame.mouse.get_pos()[0] <= (actor.xPos - screenOffsetX + actor.spriteSize[0] )) and (actor.yPos - screenOffsetY <= pygame.mouse.get_pos()[1] <= (actor.yPos -screenOffsetY + actor.spriteSize[1]))):
-						actor.selected = True
-						actorSelected = True
-						print ("Selected: " + str(actor))
+				if (actorSelected is True):
+					actorSelected = False
+					for actor in actors:
+						actor.selected = False
+						print ("Actor deselected")
 
-					elif ((sBoxStartPos[0] <= actor.xPos - screenOffsetX <= sBoxEndPos[0])):
-						actor.selected = True
-						actorSelected = True
-						print ("Selected: " + str(actor))
-
-			elif (event.button == 3):
-				for actor in actors:
-					actor.selected = False
-				actorSelected = False
-
-			#returnID = playField.id_at_pos(pygame.mouse.get_pos())
-			#clickedEntity = playField.get_entity_from_id(returnID)
-			#playField.selectedTile = clickedEntity 
-
-			if (playField.selectedTile is None):
-				pygame.display.set_caption("IDK right now {0}, Selected Tile: {1}, Tile no: {2}, Rend:{3}".format(pygame.mouse.get_pos(), "None", len(playField.entityTable), playField.renderCount))
-			else:
-				pygame.display.set_caption("IDK right now {0}, Selected Tile: {1}, Tile no: {2}, Rend: {3}".format(pygame.mouse.get_pos(), playField.selectedTile.ID, len(playField.entityTable), playField.renderCount))
+			if (event.button == 3): #Right click down
+				pass
 
 		if (event.type == pygame.MOUSEBUTTONUP):
-			if (event.button == 1):
+			if (event.button == 1): #Left click up
+
+				#if (actorSelected is True):
+				#	actorSelected = False
+				#	for actor in actors:
+				#		actor.selected = False
+
+				if (rMouseHeld is True):
+
+					for actor in actors:
+
+						if (sBoxStartPos[0] -10 <= actor.xPos <= sBoxEndPos[0] + 10):
+							actor.selected = True
+							actorSelected = True
+							print ("Actor selected")
+
 				rMouseHeld = False
 
-		if event.type == pygame.MOUSEMOTION:
-			if (playField.selectedTile is None):
-				pygame.display.set_caption("IDK right now {0}, Selected Tile: {1}, Tile no: {2}, Rend:{3}".format(pygame.mouse.get_pos(), "None", len(playField.entityTable), playField.renderCount))
-			else:
-				pygame.display.set_caption("IDK right now {0}, Selected Tile: {1}, Tile no: {2}, Rend: {3}".format(pygame.mouse.get_pos(), playField.selectedTile.ID, len(playField.entityTable), playField.renderCount))
+			if (event.button == 3):
+				for actor in actors:
+					if (actor.selected is True or actor.moving is True):
+						actor.add_destination(mousePosByOffset[0],mousePosByOffset[1])
 
-	if (rMouseHeld is True):
-		sBoxEndPos = pygame.mouse.get_pos()
+
+		if event.type == pygame.MOUSEMOTION:
+			pygame.display.set_caption("RTS WIP Mouse: {0}, Offset Mouse: {1}, OffsetX: {2}, OffsetY: {3}".format(pygame.mouse.get_pos(),mousePosByOffset,screenOffsetX,screenOffsetY))
+
 	#Window scrollin
+
+	if (rMouseHeld):
+		sBoxEndPos = mousePosByOffset
 
 	if ((0 <= pygame.mouse.get_pos()[0] <= scrollArea) and not (screenOffsetX < -scrollBoundary)):
 		screenOffsetX -= scrollSpeed
@@ -128,12 +127,12 @@ while not done:
 	screen.fill(BLACK)
 
 	playField.draw(screenOffsetX, screenOffsetY, dimensions)
-	actors.update(screenOffsetX,screenOffsetY)
+	actors.update(screenOffsetX,screenOffsetY,screen)
 	actors.draw(screen)
 	
 	if(rMouseHeld is True):
 		
-		pygame.draw.rect(screen, WHITE, [sBoxStartPos[0],sBoxStartPos[1],sBoxEndPos[0]-sBoxStartPos[0],sBoxEndPos[1]-sBoxStartPos[1]], 1)
+		pygame.draw.rect(screen, WHITE, [sBoxStartPos[0]-screenOffsetX,sBoxStartPos[1]-screenOffsetY,sBoxEndPos[0]-sBoxStartPos[0],sBoxEndPos[1]-sBoxStartPos[1]], 1)
 
 	pygame.display.flip() #Update the screen
 	clock.tick(60) #Set refresh rate

@@ -1,5 +1,6 @@
 import pygame
 from enum import Enum
+from random import randint
 
 #Vars = camelCase
 #Classes/Obj = underscores
@@ -7,7 +8,7 @@ from enum import Enum
 BLACK 	= (0,0,0)
 WHITE 	= (255,255,255)
 RED 	= (255,0,0)
-GREEN 	= (0,128,20)
+GREEN 	= (randint(0,255),randint(0,255),randint(0,255))
 BLUE 	= (0,0,255)
 
 
@@ -61,7 +62,7 @@ class tile_entity(pygame.sprite.Sprite):
 
 		if ((0 - self.width <= self.xpos <= screenDimensions["width"] + self.width) and (0 - self.height <= self.ypos <= screenDimensions["height"] + self.height )):
 
-			pygame.draw.rect(screen, self.colour, [widthOffset, heightOffset, self.width-1, self.height-1])
+			pygame.draw.rect(screen, self.colour, [widthOffset, heightOffset, self.width, self.height])
 			self.debugRender = 1
 
 		else:
@@ -152,7 +153,7 @@ class tile_field(object):
 
 class soldier(pygame.sprite.Sprite):
 
-	def __init__(self,xPos,yPos,spriteFile="soldier.png"):
+	def __init__(self,xPos,yPos,font,spriteFile="soldier.png"):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.image = pygame.image.load(spriteFile).convert()
@@ -169,19 +170,27 @@ class soldier(pygame.sprite.Sprite):
 		self.widthOffset 	= 0
 		self.heightOffset 	= 0
 
-		self.moveSpd		= 5 
+		self.moveSpd		= 4 
 
 		self.selected 		= False
+		self.moving 		= False
 
 		self.destXPos		= self.xPos
 		self.destYPos 		= self.yPos
 
 		self.spriteSize = self.rect.size
 
+		self.healthLimit = 100
+		self.health = self.healthLimit
 
-	def update(self,screenOffsetX,screenOffsetY): 
+		self.font = font
+		self.healthText 	= font.render("{0}/{1}".format(self.health,self.healthLimit), 1, WHITE)
+
+	def update(self,screenOffsetX,screenOffsetY,screen): 
 		self.widthOffset = screenOffsetX
 		self.heightOffset = screenOffsetY
+
+		self.healthText 	= self.font.render("{0}/{1}".format(self.health,self.healthLimit), 1, WHITE)
 
 		#All vars must local otherwise we get sprites wandering with viewport movement
 		xPos = self.xPos #- screenOffsetX
@@ -192,6 +201,8 @@ class soldier(pygame.sprite.Sprite):
 
 		#Movement - Nowhere near pathfinding
 		if (not (xPos == destXPos) or not (yPos == destYPos)):
+
+			self.moving = True
 
 			if (xPos < destXPos):
 				xPos += self.moveSpd
@@ -206,6 +217,9 @@ class soldier(pygame.sprite.Sprite):
 				#print("Soldier is at {0} and target is {1}".format(self.yPos, self.destYPos))
 				yPos -= self.moveSpd
 
+		else:
+			self.moving = False
+
 		self.xPos = xPos 
 		self.yPos = yPos
 		self.rect.x = self.xPos - screenOffsetX
@@ -215,16 +229,23 @@ class soldier(pygame.sprite.Sprite):
 			print ("Soldier is at {0} and {1}".format(self.xPos, self.yPos))
 			print ("Move to :" + str(destXPos - self.widthOffset)+ " " + str(destYPos - self.heightOffset))
 
-	def add_destination(self, destX, destY, screenOffsetX, screenOffsetY):
-		self.widthOffset = screenOffsetX
-		self.heightOffset = screenOffsetY
+		screen.blit(self.healthText, (self.rect.x-6, self.rect.y - 20))
 
-		self.destXPos = destX + screenOffsetX
-		self.destYPos = destY + screenOffsetY
+	def draw(self):
+		super().draw()
+		screen.blit(time_text, (self.xPos, self.yPos - 50))
+
+	def add_destination(self, destX, destY): #, screenOffsetX, screenOffsetY):
+		#self.widthOffset = screenOffsetX
+		#self.heightOffset = screenOffsetY
+
+		self.destXPos = destX #+ screenOffsetX
+		self.destYPos = destY #+ screenOffsetY
 
 
 class engineer(soldier):
 
-	def __init__(self, xPos, yPos):
-		super().__init__(xPos,yPos,"engineer.png")
-
+	def __init__(self, xPos, yPos,font):
+		super().__init__(xPos,yPos, font, "engineer.png")
+		self.healthLimit = 80
+		self.health = self.healthLimit
